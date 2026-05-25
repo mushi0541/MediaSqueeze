@@ -9,7 +9,6 @@
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React" />
   <img src="https://img.shields.io/badge/Rust-Backend-000000?style=for-the-badge&logo=rust&logoColor=white" alt="Rust" />
   <img src="https://img.shields.io/badge/TypeScript-Ready-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
-  <img src="https://img.shields.io/badge/License-MIT-brightgreen?style=for-the-badge" alt="License" />
 </p>
 
 <p align="center">
@@ -113,8 +112,10 @@ If you encounter any bugs, have questions, or want to request a new feature, ple
 
 ---
 
-## 📜 License
+## 📜 License & Usage
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+All code in this repository belongs exclusively to the **Owner**. 
+
+**Contributions are highly encouraged!** Feel free to fork, submit Pull Requests, and help improve the software. However, unauthorized redistribution, commercialization, or independent deployment of this application is strictly prohibited.
 
 Developed with ❤️ by **Mushahid** ([@mushi0541](https://github.com/mushi0541))
