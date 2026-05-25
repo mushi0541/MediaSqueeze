@@ -47,7 +47,7 @@ You do **not** need to install FFmpeg or any complicated dependencies!
 
 MediaSqueeze is distributed as a **single, standalone installer** that comes pre-bundled with everything you need to run it perfectly out of the box.
 
-👉 **[Download the Latest Installer Here](https://your-website-link-here.com)**
+👉 **[Download the Latest Installer Here](https://media-squeeze-fawn.vercel.app/)**
 
 ### Quick Start:
 1. Double-click the `.exe` or `.msi` file.
