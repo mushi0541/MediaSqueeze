@@ -1,0 +1,39 @@
+=========================================
+      MediaSqueeze Installation Guide    
+=========================================
+
+Welcome to MediaSqueeze! 
+
+This application provides blazing-fast media compression utilizing your system's native hardware acceleration (GPU) capabilities.
+
+-------------------------
+ 1. System Requirements  
+-------------------------
+- Operating System: Windows 10 / Windows 11 (64-bit)
+- Processor: Modern multi-core CPU
+- Graphics: (Optional but recommended) Nvidia, AMD, or Intel GPU for Hardware Acceleration.
+- Memory: 4GB RAM minimum (8GB recommended for heavy 4K video compression)
+
+-------------------------
+ 2. How to Install       
+-------------------------
+1. Double-click the installer executable (`MediaSqueeze_Setup.exe` or `.msi`).
+2. Follow the on-screen prompts to choose your installation directory.
+3. Once installed, launch "MediaSqueeze" from your Desktop or Start Menu.
+
+-------------------------
+ 3. Basic Usage          
+-------------------------
+1. Drag and drop your video or image files directly into the center of the app.
+2. Select your desired Quality, Preset, and Codec on the left sidebar.
+   * Tip: If you have a dedicated graphics card, make sure to select "Nvidia (NVENC)", "AMD (AMF)", or "Intel (QSV)" under the Hardware Acceleration dropdown for massive speed boosts!
+3. Click "Compress Now".
+4. Once completed, click the small "Folder" icon next to the completed file to instantly locate your optimized media!
+
+-------------------------
+ License & Contact       
+-------------------------
+Developed by Mushahid (@mushi0541)
+GitHub: https://github.com/mushi0541
+
+This software is provided under the standard MIT License.

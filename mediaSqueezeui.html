@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>MediaSqueeze</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap"
+        rel="stylesheet" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+        rel="stylesheet" />
+    <script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#4edea3",
+                        "primary-dim": "#2db882",
+                        "on-primary": "#003824",
+                        "primary-container": "#10b981",
+                        "secondary": "#4fdbc8",
+                        "on-secondary": "#003731",
+                        "tertiary": "#4cd7f6",
+                        "surface": "#0e1511",
+                        "surface-dim": "#0e1511",
+                        "surface-container-lowest": "#09100c",
+                        "surface-container-low": "#161d19",
+                        "surface-container": "#1a211d",
+                        "surface-container-high": "#242c27",
+                        "surface-container-highest": "#2f3632",
+                        "surface-variant": "#2f3632",
+                        "surface-bright": "#343b36",
+                        "on-surface": "#dde4dd",
+                        "on-surface-variant": "#bbcabf",
+                        "outline": "#86948a",
+                        "outline-variant": "#3c4a42",
+                        "error": "#ffb4ab",
+                        "error-container": "#93000a",
+                        "background": "#0e1511",
+                        "on-background": "#dde4dd",
+                        "inverse-surface": "#dde4dd",
+                        "inverse-on-surface": "#2b322d",
+                        "inverse-primary": "#006c49",
+                        "surface-tint": "#4edea3",
+                    },
+                    fontFamily: {
+                        sans: ["Geist", "system-ui", "sans-serif"],
+                        mono: ["JetBrains Mono", "monospace"],
+                    },
+                    fontSize: {
+                        "display": ["48px", { lineHeight: "56px", letterSpacing: "-0.02em", fontWeight: "700" }],
+                        "headline-lg": ["32px", { lineHeight: "40px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "headline-md": ["24px", { lineHeight: "32px", fontWeight: "600" }],
+                        "body-lg": ["18px", { lineHeight: "28px", fontWeight: "400" }],
+                        "body-md": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "label-mono": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "500" }],
+                    },
+                    animation: {
+                        "bg-shift": "bg-shift 18s ease infinite",
+                        "pulse-border": "pulse-border 3s cubic-bezier(0.4,0,0.6,1) infinite",
+                        "float": "float 5s ease-in-out infinite",
+                        "waveform": "waveform 1.2s ease-in-out infinite alternate",
+                        "shimmer": "shimmer 2s linear infinite",
+                        "spin-slow": "spin 8s linear infinite",
+                        "fade-in": "fade-in 0.4s ease forwards",
+                        "slide-up": "slide-up 0.4s ease forwards",
+                    },
+                    keyframes: {
+                        "bg-shift": { "0%": { backgroundPosition: "0% 50%" }, "50%": { backgroundPosition: "100% 50%" }, "100%": { backgroundPosition: "0% 50%" } },
+                        "pulse-border": { "0%,100%": { opacity: "1", borderColor: "#3c4a42" }, "50%": { opacity: "0.5", borderColor: "#4edea3" } },
+                        "float": { "0%,100%": { transform: "translateY(0)" }, "50%": { transform: "translateY(-8px)" } },
+                        "waveform": { "0%": { height: "4px" }, "100%": { height: "100%" } },
+                        "shimmer": { "0%": { backgroundPosition: "-200% 0" }, "100%": { backgroundPosition: "200% 0" } },
+                        "fade-in": { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+                        "slide-up": { "0%": { opacity: "0", transform: "translateY(12px)" }, "100%": { opacity: "1", transform: "translateY(0)" } },
+                    },
+                },
+            },
+        }
+    </script>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: "Geist", system-ui, sans-serif;
+        }
+
+        /* ── Animated mesh background ── */
+        .animated-bg {
+            background: linear-gradient(-45deg, #09100c, #0e1511, #0a1a12, #002e20, #001f16, #0e1511);
+            background-size: 600% 600%;
+            animation: bg-shift 18s ease infinite;
+        }
+
+        /* ── Terminal grid overlay ── */
+        .terminal-grid::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(78, 222, 163, 0.025) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(78, 222, 163, 0.025) 1px, transparent 1px);
+            background-size: 28px 28px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ── Film grain ── */
+        .film-grain::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            border-radius: inherit;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* ── Glass surface ── */
+        .glass {
+            background: rgba(22, 29, 25, 0.55);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(60, 74, 66, 0.45);
+        }
+
+        /* ── Drop zone ── */
+        .drop-zone {
+            border: 2px dashed #3c4a42;
+            border-radius: 24px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .drop-zone:hover {
+            border-color: #4edea3;
+            background: rgba(78, 222, 163, 0.04);
+        }
+
+        .drop-zone.active-border {
+            animation: pulse-border 3s ease infinite;
+        }
+
+        /* ── Progress bar shimmer ── */
+        .progress-fill {
+            background: linear-gradient(90deg, #2db882 0%, #4edea3 40%, #71f8e4 60%, #4edea3 80%, #2db882 100%);
+            background-size: 200% 100%;
+            animation: shimmer 2s linear infinite;
+            border-radius: 9999px;
+            height: 100%;
+            transition: width 0.4s ease;
+        }
+
+        /* ── Waveform bars ── */
+        .wave-bar {
+            width: 2.5px;
+            background: #4edea3;
+            border-radius: 2px;
+            display: inline-block;
+            margin: 0 1px;
+            animation: waveform 1.2s ease-in-out infinite alternate;
+            min-height: 4px;
+        }
+
+        .wave-bar:nth-child(2n) {
+            animation-delay: 0.15s;
+        }
+
+        .wave-bar:nth-child(3n) {
+            animation-delay: 0.3s;
+        }
+
+        .wave-bar:nth-child(4n) {
+            animation-delay: 0.08s;
+        }
+
+        .wave-bar:nth-child(5n) {
+            animation-delay: 0.45s;
+        }
+
+        .wave-bar:nth-child(7n) {
+            animation-delay: 0.22s;
+        }
+
+        .wave-bar:nth-child(11n) {
+            animation-delay: 0.55s;
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2f3632;
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #4edea3;
+        }
+
+        /* ── Sidebar nav active ── */
+        .nav-active {
+            background: rgba(78, 222, 163, 0.12);
+            color: #4edea3;
+            border-left: 2px solid #4edea3;
+        }
+
+        /* ── Metric bar ── */
+        .metric-bar-fill {
+            height: 100%;
+            border-radius: 9999px;
+            transition: width 0.6s ease;
+        }
+
+        /* ── Glow button ── */
+        .btn-glow {
+            box-shadow: 0 0 20px rgba(78, 222, 163, 0.3);
+            transition: box-shadow 0.3s, transform 0.15s;
+        }
+
+        .btn-glow:hover {
+            box-shadow: 0 0 36px rgba(78, 222, 163, 0.55);
+            transform: translateY(-1px);
+        }
+
+        .btn-glow:active {
+            transform: scale(0.97);
+        }
+
+        /* ── Preset card glow ── */
+        .preset-active {
+            border-color: #4edea3 !important;
+            background: rgba(78, 222, 163, 0.08);
+            box-shadow: 0 0 18px rgba(78, 222, 163, 0.18), inset 0 0 0 1px rgba(78, 222, 163, 0.15);
+        }
+
+        /* ── Type pill toggle ── */
+        .type-pill-bg {
+            background: rgba(36, 44, 39, 0.8);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(60, 74, 66, 0.4);
+        }
+
+        /* ── History entry ── */
+        .history-entry {
+            animation: slide-up 0.35s ease forwards;
+        }
+
+        /* ── Result panel ── */
+        .result-panel {
+            animation: fade-in 0.5s ease forwards;
+        }
+
+        /* ── Confetti dot ── */
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(60px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .confetti-dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            border-radius: 2px;
+            animation: confetti-fall 0.8s ease forwards;
+        }
+    </style>
+</head>
+
+<body
+    class="bg-surface-container-lowest text-on-surface text-body-md antialiased h-screen flex flex-col overflow-hidden relative">
+
+    <!-- ── Animated background layer ── -->
+    <div class="fixed inset-0 z-0 animated-bg terminal-grid opacity-90 pointer-events-none"></div>
+
+    <!-- ══════════════════════════════════════════════════════
+       TOP NAV
+  ══════════════════════════════════════════════════════ -->
+    <nav
+        class="relative z-50 shrink-0 glass border-b border-outline-variant/30 flex items-center justify-between px-6 h-14">
+        <!-- Brand -->
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/15 border border-primary/30">
+                <span class="material-symbols-outlined text-primary"
+                    style="font-size:18px;font-variation-settings:'FILL' 1">compress</span>
+            </div>
+            <div>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-primary font-semibold tracking-tight" style="font-size:16px;">MediaSqueeze</span>
+                    <span class="font-mono text-primary/60 border border-primary/20 px-1.5 py-px rounded"
+                        style="font-size:10px;letter-spacing:0.08em;">PRO</span>
+                </div>
+                <div class="text-on-surface-variant" style="font-size:10px;letter-spacing:0.03em;">Compression,
+                    beautifully done</div>
+            </div>
+        </div>
+
+        <!-- Center status -->
+        <div class="flex items-center gap-2 font-mono" style="font-size:11px;">
+            <span class="w-1.5 h-1.5 rounded-full bg-primary"
+                style="animation:pulse 2s infinite;box-shadow:0 0 6px #4edea3;"></span>
+            <span class="text-outline">Engine Active</span>
+            <span
+                class="ml-3 px-2 py-0.5 rounded bg-surface-container text-on-surface-variant border border-outline-variant/30">HW
+                Accel: ON</span>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex items-center gap-4">
+            <!-- Light/dark toggle -->
+            <button class="text-on-surface-variant hover:text-primary transition-colors" id="theme-toggle"
+                title="Toggle theme">
+                <span class="material-symbols-outlined" style="font-size:20px;" data-icon="light_mode">light_mode</span>
+            </button>
+            <button class="text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined" style="font-size:20px;">notifications</span>
+            </button>
+            <button class="text-on-surface-variant hover:text-primary transition-colors">
+                <span class="material-symbols-outlined" style="font-size:20px;">settings</span>
+            </button>
+            <div class="w-7 h-7 rounded-full bg-primary/20 border border-primary/30 flex items-center justify-center text-primary font-semibold cursor-pointer hover:border-primary transition-colors"
+                style="font-size:12px;">U</div>
+        </div>
+    </nav>
+
+    <!-- ══════════════════════════════════════════════════════
+       WORKSPACE
+  ══════════════════════════════════════════════════════ -->
+    <div class="flex flex-1 overflow-hidden relative z-10">
+
+        <!-- ── LEFT SIDEBAR ── -->
+        <aside class="w-60 shrink-0 flex flex-col border-r border-outline-variant/25 glass overflow-y-auto">
+            <div class="px-3 py-4 space-y-0.5">
+                <a href="#"
+                    class="nav-active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all">
+                    <span class="material-symbols-outlined" style="font-size:18px;" data-icon="movie">movie</span> Video
+                </a>
+                <a href="#"
+                    class="text-on-surface-variant flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-surface-container-high/60 hover:text-on-surface transition-all">
+                    <span class="material-symbols-outlined" style="font-size:18px;">image</span> Image
+                </a>
+                <a href="#"
+                    class="text-on-surface-variant flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-surface-container-high/60 hover:text-on-surface transition-all">
+                    <span class="material-symbols-outlined" style="font-size:18px;">folder_open</span> Library
+                </a>
+                <a href="#"
+                    class="text-on-surface-variant flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium hover:bg-surface-container-high/60 hover:text-on-surface transition-all">
+                    <span class="material-symbols-outlined" style="font-size:18px;">insights</span> Analytics
+                </a>
+            </div>
+
+            <div class="px-3 mt-2 mb-2">
+                <div class="h-px bg-outline-variant/20"></div>
+            </div>
+
+            <!-- Advanced controls -->
+            <div class="px-4 py-3 flex-1 space-y-4 overflow-y-auto">
+                <div class="flex items-center justify-between">
+                    <span class="font-mono text-on-surface-variant uppercase tracking-wider"
+                        style="font-size:10px;">Advanced Controls</span>
+                    <span class="material-symbols-outlined text-primary" style="font-size:15px;">tune</span>
+                </div>
+
+                <!-- Video section -->
+                <div class="space-y-3">
+                    <div class="text-on-surface font-semibold pb-1 border-b border-outline-variant/20"
+                        style="font-size:11px;">Video</div>
+                    <div>
+                        <label class="text-on-surface-variant block mb-1" style="font-size:10px;">Codec</label>
+                        <select
+                            class="w-full bg-surface border border-outline-variant/30 rounded px-2 py-1.5 text-on-surface focus:border-primary outline-none transition-colors"
+                            style="font-size:11px;">
+                            <option>H.265 (HEVC)</option>
+                            <option>H.264 (AVC)</option>
+                            <option>AV1</option>
+                            <option>VP9</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="text-on-surface-variant block mb-1" style="font-size:10px;">Resolution</label>
+                        <select
+                            class="w-full bg-surface border border-outline-variant/30 rounded px-2 py-1.5 text-on-surface focus:border-primary outline-none transition-colors"
+                            style="font-size:11px;">
+                            <option>Original</option>
+                            <option>3840×2160 (4K)</option>
+                            <option>1920×1080 (1080p)</option>
+                            <option>1280×720 (720p)</option>
+                            <option>854×480 (480p)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1" style="font-size:10px;">
+                            <span class="text-on-surface-variant">CRF Value</span>
+                            <span class="font-mono text-primary" id="crf-label">28</span>
+                        </div>
+                        <input type="range" min="0" max="51" value="28" id="crf-slider"
+                            class="w-full h-1 rounded-lg appearance-none cursor-pointer accent-primary"
+                            style="background:#2f3632;" />
+                        <div class="flex justify-between mt-1" style="font-size:9px;">
+                            <span class="text-primary">Best quality</span>
+                            <span class="text-outline">Smallest file</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-2 cursor-pointer" style="font-size:11px;">
+                            <input type="checkbox" checked class="rounded accent-primary" />
+                            <span class="text-on-surface">2-Pass Encoding</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Audio section -->
+                <div class="space-y-3">
+                    <div class="text-on-surface font-semibold pb-1 border-b border-outline-variant/20"
+                        style="font-size:11px;">Audio</div>
+                    <div>
+                        <label class="text-on-surface-variant block mb-1" style="font-size:10px;">Codec</label>
+                        <select
+                            class="w-full bg-surface border border-outline-variant/30 rounded px-2 py-1.5 text-on-surface focus:border-primary outline-none"
+                            style="font-size:11px;">
+                            <option>AAC</option>
+                            <option>Opus</option>
+                            <option>MP3</option>
+                            <option>Pass-through</option>
+                        </select>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-1" style="font-size:10px;">
+                            <span class="text-on-surface-variant">Bitrate</span>
+                            <span class="font-mono text-primary">192 kbps</span>
+                        </div>
+                        <input type="range" min="64" max="320" value="192"
+                            class="w-full h-1 rounded-lg appearance-none cursor-pointer accent-primary"
+                            style="background:#2f3632;" />
+                    </div>
+                    <div>
+                        <label class="flex items-center gap-2 cursor-pointer" style="font-size:11px;">
+                            <input type="checkbox" class="rounded accent-primary" />
+                            <span class="text-on-surface">Remove Audio</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Compress button (sidebar) -->
+            <div class="p-4 border-t border-outline-variant/20">
+                <button
+                    class="w-full py-2.5 rounded-lg bg-primary text-on-primary font-semibold btn-glow flex items-center justify-center gap-2 transition-all"
+                    style="font-size:13px;" id="compress-btn">
+                    <span class="material-symbols-outlined"
+                        style="font-size:18px;font-variation-settings:'FILL' 1">bolt</span>
+                    Compress Now
+                </button>
+            </div>
+        </aside>
+
+        <!-- ── MAIN CANVAS ── -->
+        <main class="flex-1 flex flex-col overflow-y-auto p-6 gap-5 min-w-0">
+
+            <!-- Header row -->
+            <header class="flex items-center justify-between">
+                <div>
+                    <h1 class="text-on-surface font-semibold" style="font-size:20px;">Compress Media</h1>
+                    <p class="text-on-surface-variant" style="font-size:13px;">Optimize videos and images without losing
+                        visual quality.</p>
+                </div>
+                <!-- Media type toggle -->
+                <div class="type-pill-bg rounded-full p-1 flex relative" id="type-toggle">
+                    <div class="absolute top-1 bottom-1 left-1 rounded-full bg-primary transition-all duration-300 z-0"
+                        id="type-pill-indicator" style="width:calc(50% - 4px);"></div>
+                    <button
+                        class="px-5 py-1.5 rounded-full font-medium relative z-10 transition-colors duration-200 text-on-primary"
+                        id="btn-video" style="font-size:13px;min-width:72px;">
+                        <span class="material-symbols-outlined align-middle mr-1"
+                            style="font-size:14px;">movie</span>Video
+                    </button>
+                    <button
+                        class="px-5 py-1.5 rounded-full font-medium relative z-10 transition-colors duration-200 text-on-surface-variant"
+                        id="btn-image" style="font-size:13px;min-width:72px;">
+                        <span class="material-symbols-outlined align-middle mr-1"
+                            style="font-size:14px;">image</span>Image
+                    </button>
+                </div>
+            </header>
+
+            <!-- Drop Zone -->
+            <section
+                class="relative drop-zone active-border film-grain bg-surface-container/15 backdrop-blur-sm flex flex-col items-center justify-center cursor-pointer group transition-all duration-400 overflow-hidden"
+                style="min-height:220px;" id="drop-zone">
+
+                <!-- Idle state -->
+                <div class="flex flex-col items-center z-10 py-10 px-6 text-center" id="drop-idle">
+                    <div
+                        class="w-16 h-16 rounded-2xl bg-surface-container-high/80 flex items-center justify-center mb-4 border border-outline-variant/40 group-hover:border-primary/50 group-hover:shadow-[0_0_24px_rgba(78,222,163,0.2)] transition-all duration-300 animate-float">
+                        <span class="material-symbols-outlined text-primary"
+                            style="font-size:32px;font-variation-settings:'FILL' 1">cloud_upload</span>
+                    </div>
+                    <h3 class="text-on-surface font-semibold mb-1 group-hover:text-primary transition-colors"
+                        style="font-size:16px;" id="drop-headline">
+                        Drop your video here
+                    </h3>
+                    <p class="text-on-surface-variant mb-5" style="font-size:13px;">or click to browse from your device
+                    </p>
+                    <div class="flex flex-wrap gap-2 justify-center" id="format-chips">
+                        <span
+                            class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors"
+                            style="font-size:10px;">MP4</span>
+                        <span
+                            class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors"
+                            style="font-size:10px;">AVI</span>
+                        <span
+                            class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors"
+                            style="font-size:10px;">MOV</span>
+                        <span
+                            class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors"
+                            style="font-size:10px;">MKV</span>
+                        <span
+                            class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors"
+                            style="font-size:10px;">WEBM</span>
+                        <span
+                            class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors"
+                            style="font-size:10px;">FLV</span>
+                    </div>
+                </div>
+
+                <!-- Loaded state (hidden initially) -->
+                <div class="hidden w-full p-5 z-10" id="drop-loaded">
+                    <div class="flex items-start gap-4">
+                        <div
+                            class="w-20 h-16 rounded-xl bg-surface-container-high flex items-center justify-center border border-primary/30 flex-shrink-0 relative overflow-hidden">
+                            <span class="material-symbols-outlined text-primary"
+                                style="font-size:28px;font-variation-settings:'FILL' 1"
+                                id="file-thumb-icon">movie</span>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-start justify-between gap-2">
+                                <p class="text-on-surface font-semibold truncate" style="font-size:14px;"
+                                    id="loaded-filename">video_project_final.mp4</p>
+                                <button
+                                    class="text-on-surface-variant hover:text-primary ml-2 flex-shrink-0 transition-colors"
+                                    id="remove-file">
+                                    <span class="material-symbols-outlined" style="font-size:18px;">close</span>
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap gap-2 mt-2" id="loaded-chips">
+                                <span
+                                    class="px-2.5 py-0.5 bg-surface-container-high rounded-full font-mono text-on-surface-variant border border-outline-variant/30"
+                                    style="font-size:10px;">2.4 GB</span>
+                                <span
+                                    class="px-2.5 py-0.5 bg-surface-container-high rounded-full font-mono text-on-surface-variant border border-outline-variant/30"
+                                    style="font-size:10px;">1920×1080</span>
+                                <span
+                                    class="px-2.5 py-0.5 bg-surface-container-high rounded-full font-mono text-on-surface-variant border border-outline-variant/30"
+                                    style="font-size:10px;">00:04:32</span>
+                                <span
+                                    class="px-2.5 py-0.5 bg-primary/15 rounded-full font-mono text-primary border border-primary/30"
+                                    style="font-size:10px;">H.264</span>
+                                <span
+                                    class="px-2.5 py-0.5 bg-surface-container-high rounded-full font-mono text-on-surface-variant border border-outline-variant/30"
+                                    style="font-size:10px;">29.97 fps</span>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- Waveform row (for video) -->
+                    <div class="mt-4 flex items-end gap-0 h-8 w-full overflow-hidden opacity-60" id="waveform-row">
+                        <div class="flex-shrink-0 font-mono text-primary mr-2 flex items-center"
+                            style="font-size:8px;letter-spacing:0.08em;">AUDIO</div>
+                        <div class="flex items-end gap-px h-full flex-1">
+                            <div class="wave-bar" style="height:30%"></div>
+                            <div class="wave-bar" style="height:55%"></div>
+                            <div class="wave-bar" style="height:20%"></div>
+                            <div class="wave-bar" style="height:80%"></div>
+                            <div class="wave-bar" style="height:45%"></div>
+                            <div class="wave-bar" style="height:100%"></div>
+                            <div class="wave-bar" style="height:60%"></div>
+                            <div class="wave-bar" style="height:35%"></div>
+                            <div class="wave-bar" style="height:75%"></div>
+                            <div class="wave-bar" style="height:50%"></div>
+                            <div class="wave-bar" style="height:25%"></div>
+                            <div class="wave-bar" style="height:90%"></div>
+                            <div class="wave-bar" style="height:40%"></div>
+                            <div class="wave-bar" style="height:65%"></div>
+                            <div class="wave-bar" style="height:30%"></div>
+                            <div class="wave-bar" style="height:85%"></div>
+                            <div class="wave-bar" style="height:55%"></div>
+                            <div class="wave-bar" style="height:20%"></div>
+                            <div class="wave-bar" style="height:70%"></div>
+                            <div class="wave-bar" style="height:45%"></div>
+                            <div class="wave-bar" style="height:95%"></div>
+                            <div class="wave-bar" style="height:35%"></div>
+                            <div class="wave-bar" style="height:60%"></div>
+                            <div class="wave-bar" style="height:25%"></div>
+                            <div class="wave-bar" style="height:80%"></div>
+                            <div class="wave-bar" style="height:50%"></div>
+                            <div class="wave-bar" style="height:100%"></div>
+                            <div class="wave-bar" style="height:40%"></div>
+                            <div class="wave-bar" style="height:70%"></div>
+                            <div class="wave-bar" style="height:30%"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Preset Cards -->
+            <section>
+                <h4 class="text-on-surface-variant mb-3 font-medium"
+                    style="font-size:12px;letter-spacing:0.04em;text-transform:uppercase;">Compression Preset</h4>
+                <div class="grid grid-cols-3 gap-3" id="preset-cards">
+
+                    <!-- Low -->
+                    <div class="glass rounded-xl p-4 cursor-pointer border border-outline-variant/30 hover:border-outline-variant/60 transition-all duration-200 hover:-translate-y-0.5 preset-card text-center"
+                        data-preset="low">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-surface-container-high/80 flex items-center justify-center mx-auto mb-3 border border-outline-variant/30">
+                            <span class="material-symbols-outlined text-tertiary"
+                                style="font-size:20px;font-variation-settings:'FILL' 1">compress</span>
+                        </div>
+                        <div class="font-semibold text-on-surface mb-0.5" style="font-size:13px;">Low</div>
+                        <div class="text-on-surface-variant mb-2" style="font-size:11px;">Smallest file</div>
+                        <div class="font-mono text-outline" style="font-size:10px;">~60–70% smaller · CRF 36</div>
+                    </div>
+
+                    <!-- Medium (default active) -->
+                    <div class="glass rounded-xl p-4 cursor-pointer border preset-active transition-all duration-200 preset-card text-center relative overflow-hidden animate-float"
+                        data-preset="medium">
+                        <div class="absolute top-0 left-0 right-0 h-0.5 bg-primary"
+                            style="box-shadow:0 0 8px rgba(78,222,163,0.8);"></div>
+                        <div class="absolute top-2 right-2">
+                            <span class="font-mono bg-primary/20 text-primary px-1.5 py-px rounded"
+                                style="font-size:9px;letter-spacing:0.06em;">✦ REC</span>
+                        </div>
+                        <div
+                            class="w-10 h-10 rounded-xl bg-primary/15 flex items-center justify-center mx-auto mb-3 border border-primary/30">
+                            <span class="material-symbols-outlined text-primary"
+                                style="font-size:20px;font-variation-settings:'FILL' 1">tune</span>
+                        </div>
+                        <div class="font-semibold text-primary mb-0.5" style="font-size:13px;">Medium</div>
+                        <div class="text-on-surface-variant mb-2" style="font-size:11px;">Balanced quality</div>
+                        <div class="font-mono text-primary/70" style="font-size:10px;">~40–50% smaller · CRF 28</div>
+                    </div>
+
+                    <!-- High -->
+                    <div class="glass rounded-xl p-4 cursor-pointer border border-outline-variant/30 hover:border-outline-variant/60 transition-all duration-200 hover:-translate-y-0.5 preset-card text-center"
+                        data-preset="high">
+                        <div
+                            class="w-10 h-10 rounded-xl bg-surface-container-high/80 flex items-center justify-center mx-auto mb-3 border border-outline-variant/30">
+                            <span class="material-symbols-outlined"
+                                style="font-size:20px;font-variation-settings:'FILL' 1;color:#fbbf24;">diamond</span>
+                        </div>
+                        <div class="font-semibold text-on-surface mb-0.5" style="font-size:13px;">High</div>
+                        <div class="text-on-surface-variant mb-2" style="font-size:11px;">Best quality kept</div>
+                        <div class="font-mono text-outline" style="font-size:10px;">~20–30% smaller · CRF 20</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- CTA / Progress / Result -->
+            <div id="action-area">
+
+                <!-- CTA (default) -->
+                <div id="cta-section">
+                    <button
+                        class="w-full py-3.5 rounded-xl bg-gradient-to-r from-primary-dim to-primary text-on-primary font-bold btn-glow flex items-center justify-center gap-2 transition-all"
+                        style="font-size:15px;" id="main-compress-btn">
+                        <span class="material-symbols-outlined"
+                            style="font-size:20px;font-variation-settings:'FILL' 1">rocket_launch</span>
+                        Compress Now
+                    </button>
+                </div>
+
+                <!-- Progress (hidden) -->
+                <div id="progress-section" class="hidden">
+                    <div class="glass rounded-xl p-5 border border-outline-variant/30">
+                        <div class="flex items-center justify-between mb-3">
+                            <span class="text-on-surface font-medium" style="font-size:13px;">Compressing…</span>
+                            <span class="font-mono text-primary font-bold" style="font-size:14px;"
+                                id="pct-label">0%</span>
+                        </div>
+                        <div class="w-full h-2 rounded-full bg-surface-container-highest overflow-hidden mb-2">
+                            <div class="progress-fill" id="progress-bar" style="width:0%;"></div>
+                        </div>
+                        <div class="flex justify-between" style="font-size:11px;">
+                            <span class="text-on-surface-variant font-mono" id="eta-label">Estimating…</span>
+                            <span class="text-on-surface-variant font-mono" id="fps-label">-- fps</span>
+                        </div>
+                        <button
+                            class="mt-4 w-full py-2 rounded-lg border border-error/40 text-error hover:bg-error/10 transition-colors font-medium"
+                            style="font-size:13px;" id="cancel-btn">
+                            Cancel
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Result (hidden) -->
+                <div id="result-section" class="hidden result-panel">
+                    <div class="glass rounded-xl p-5 border border-primary/30"
+                        style="box-shadow:0 0 24px rgba(78,222,163,0.1);">
+                        <div class="flex items-center gap-2 mb-4">
+                            <span class="material-symbols-outlined text-primary"
+                                style="font-size:22px;font-variation-settings:'FILL' 1">check_circle</span>
+                            <span class="text-on-surface font-semibold" style="font-size:14px;">Compression
+                                complete!</span>
+                        </div>
+                        <div class="flex items-center justify-center gap-4 mb-4">
+                            <div class="text-center">
+                                <div class="text-on-surface-variant" style="font-size:10px;">Original</div>
+                                <div class="text-on-surface font-bold" style="font-size:18px;" id="res-original">2.4 GB
+                                </div>
+                            </div>
+                            <span class="material-symbols-outlined text-outline"
+                                style="font-size:20px;">arrow_right_alt</span>
+                            <div class="text-center">
+                                <div class="text-on-surface-variant" style="font-size:10px;">Compressed</div>
+                                <div class="text-primary font-bold" style="font-size:18px;" id="res-output">680 MB</div>
+                            </div>
+                        </div>
+                        <div class="text-center mb-5">
+                            <div class="text-primary font-bold" style="font-size:28px;" id="res-saved">−71%</div>
+                            <div class="text-on-surface-variant" style="font-size:12px;" id="res-saved-mb">You saved
+                                1.72 GB</div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <button
+                                class="py-2.5 rounded-xl bg-primary text-on-primary font-semibold btn-glow transition-all"
+                                style="font-size:13px;">
+                                <span class="material-symbols-outlined align-middle mr-1"
+                                    style="font-size:15px;font-variation-settings:'FILL' 1">folder_open</span>Open File
+                            </button>
+                            <button
+                                class="py-2.5 rounded-xl glass border border-outline-variant/40 text-on-surface font-medium hover:border-outline-variant/70 transition-all"
+                                style="font-size:13px;" id="compress-another-btn">
+                                Compress Another
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error (hidden) -->
+                <div id="error-section" class="hidden">
+                    <div class="glass rounded-xl p-4 border border-error/30 bg-error-container/10">
+                        <div class="flex items-center gap-2 mb-2">
+                            <span class="material-symbols-outlined text-error"
+                                style="font-size:18px;font-variation-settings:'FILL' 1">error</span>
+                            <span class="text-error font-medium" style="font-size:13px;">Compression failed</span>
+                        </div>
+                        <p class="text-on-surface-variant mb-3" style="font-size:12px;" id="error-msg">FFmpeg exited
+                            with code 1. Check the file format and try again.</p>
+                        <button
+                            class="w-full py-2 rounded-lg border border-error/40 text-error hover:bg-error/10 transition-colors"
+                            style="font-size:12px;">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <!-- ── RIGHT SIDEBAR ── -->
+        <aside class="w-72 shrink-0 flex flex-col border-l border-outline-variant/25 glass overflow-hidden">
+
+            <!-- System metrics -->
+            <div class="p-4 border-b border-outline-variant/20 flex-shrink-0">
+                <div class="flex items-center gap-2 mb-4">
+                    <span class="material-symbols-outlined text-primary" style="font-size:15px;">query_stats</span>
+                    <span class="font-mono text-on-surface-variant uppercase tracking-wider"
+                        style="font-size:10px;">System Metrics</span>
+                </div>
+
+                <!-- Est output -->
+                <div class="glass rounded-lg p-3 flex items-center justify-between border-l-2 border-primary mb-4">
+                    <div class="text-on-surface-variant" style="font-size:11px;">Est. Output</div>
+                    <div class="font-mono text-primary font-bold" style="font-size:16px;" id="est-output">-- MB</div>
+                </div>
+
+                <!-- Metric bars -->
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between font-mono text-on-surface-variant mb-1"
+                            style="font-size:10px;">
+                            <span>CPU Load</span><span id="cpu-val">12%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                            <div class="metric-bar-fill bg-secondary" id="cpu-bar" style="width:12%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between font-mono text-on-surface-variant mb-1"
+                            style="font-size:10px;">
+                            <span>GPU Compute</span><span id="gpu-val">4%</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                            <div class="metric-bar-fill bg-primary" id="gpu-bar" style="width:4%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between font-mono text-on-surface-variant mb-1"
+                            style="font-size:10px;">
+                            <span>VRAM</span><span class="text-on-surface-variant" id="vram-val">1.2 / 24 GB</span>
+                        </div>
+                        <div class="w-full h-1.5 bg-surface-variant rounded-full overflow-hidden">
+                            <div class="metric-bar-fill bg-tertiary" id="vram-bar" style="width:5%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job history -->
+            <div
+                class="px-4 py-3 border-b border-outline-variant/20 bg-surface-container/30 flex items-center justify-between flex-shrink-0">
+                <span class="font-mono text-on-surface-variant uppercase tracking-wider" style="font-size:10px;">Job
+                    Queue</span>
+                <span class="font-mono text-on-surface-variant bg-surface-variant px-2 py-0.5 rounded"
+                    style="font-size:9px;" id="queue-count">0 Active</span>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-3 space-y-2" id="history-list">
+
+                <!-- Entry 1 -->
+                <div
+                    class="history-entry p-3 bg-surface rounded-lg border border-outline-variant/20 flex flex-col gap-1.5">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="material-symbols-outlined text-primary flex-shrink-0"
+                                style="font-size:14px;font-variation-settings:'FILL' 1">check_circle</span>
+                            <span class="text-on-surface font-medium truncate"
+                                style="font-size:12px;">promo_final_v2.mp4</span>
+                        </div>
+                        <button class="text-on-surface-variant hover:text-primary flex-shrink-0 ml-1">
+                            <span class="material-symbols-outlined" style="font-size:15px;">more_vert</span>
+                        </button>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-on-surface-variant" style="font-size:10px;">1.2 GB → 340 MB</span>
+                        <span class="font-mono text-primary font-bold" style="font-size:10px;">−71%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-1.5 py-px rounded bg-primary/15 text-primary font-mono"
+                            style="font-size:9px;">medium</span>
+                        <span class="text-outline" style="font-size:9px;">2 min ago</span>
+                    </div>
+                </div>
+
+                <!-- Entry 2 -->
+                <div
+                    class="history-entry p-3 bg-surface rounded-lg border border-outline-variant/20 flex flex-col gap-1.5 opacity-70">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="material-symbols-outlined text-primary flex-shrink-0"
+                                style="font-size:14px;font-variation-settings:'FILL' 1">check_circle</span>
+                            <span class="text-on-surface font-medium truncate"
+                                style="font-size:12px;">interview_raw_01.mov</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-on-surface-variant" style="font-size:10px;">4.5 GB → 1.1 GB</span>
+                        <span class="font-mono text-primary font-bold" style="font-size:10px;">−75%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-1.5 py-px rounded bg-tertiary/15 text-tertiary font-mono"
+                            style="font-size:9px;">low</span>
+                        <span class="text-outline" style="font-size:9px;">Yesterday</span>
+                    </div>
+                </div>
+
+                <!-- Entry 3 (image) -->
+                <div
+                    class="history-entry p-3 bg-surface rounded-lg border border-outline-variant/20 flex flex-col gap-1.5 opacity-60">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span class="material-symbols-outlined text-primary flex-shrink-0"
+                                style="font-size:14px;font-variation-settings:'FILL' 1">check_circle</span>
+                            <span class="text-on-surface font-medium truncate"
+                                style="font-size:12px;">banner_hero.png</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="font-mono text-on-surface-variant" style="font-size:10px;">18.4 MB → 2.1 MB</span>
+                        <span class="font-mono text-primary font-bold" style="font-size:10px;">−88%</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-1.5 py-px rounded font-mono"
+                            style="font-size:9px;background:rgba(251,191,36,0.15);color:#fbbf24;">high</span>
+                        <span class="px-1.5 py-px rounded bg-surface-variant text-outline font-mono"
+                            style="font-size:9px;">image</span>
+                        <span class="text-outline" style="font-size:9px;">Yesterday</span>
+                    </div>
+                </div>
+
+                <!-- Empty hint -->
+                <div class="text-center py-4 text-on-surface-variant" style="font-size:11px;">
+                    <span class="material-symbols-outlined block mx-auto mb-1 opacity-40"
+                        style="font-size:28px;">history</span>
+                    Compressions appear here
+                </div>
+            </div>
+        </aside>
+
+    </div><!-- end workspace -->
+
+    <!-- ══════════════════════════════════════════════════════
+     INTERACTIONS (demo only — agent will replace with React)
+══════════════════════════════════════════════════════ -->
+    <script>
+        // CRF slider label
+        const crf = document.getElementById('crf-slider');
+        const crfLabel = document.getElementById('crf-label');
+        if (crf) crf.addEventListener('input', () => crfLabel.textContent = crf.value);
+
+        // Preset card selection
+        document.querySelectorAll('.preset-card').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelectorAll('.preset-card').forEach(c => {
+                    c.classList.remove('preset-active', 'animate-float');
+                    c.classList.add('border-outline-variant/30');
+                    c.querySelector('.absolute')?.remove?.();
+                });
+                card.classList.add('preset-active', 'animate-float');
+                card.classList.remove('border-outline-variant/30');
+                const top = document.createElement('div');
+                top.className = 'absolute top-0 left-0 right-0 h-0.5 bg-primary';
+                top.style.boxShadow = '0 0 8px rgba(78,222,163,0.8)';
+                card.prepend(top);
+            });
+        });
+
+        // Media type toggle
+        const btnVideo = document.getElementById('btn-video');
+        const btnImage = document.getElementById('btn-image');
+        const indicator = document.getElementById('type-pill-indicator');
+        const dropHeadline = document.getElementById('drop-headline');
+        const formatChips = document.getElementById('format-chips');
+
+        const videoFormats = ['MP4', 'AVI', 'MOV', 'MKV', 'WEBM', 'FLV', 'M4V'];
+        const imageFormats = ['JPG', 'PNG', 'WEBP', 'AVIF', 'TIFF', 'BMP', 'GIF'];
+
+        function setMode(mode) {
+            if (mode === 'video') {
+                indicator.style.left = '4px';
+                indicator.style.transform = 'translateX(0)';
+                btnVideo.classList.replace('text-on-surface-variant', 'text-on-primary');
+                btnImage.classList.replace('text-on-primary', 'text-on-surface-variant');
+                dropHeadline.textContent = 'Drop your video here';
+                formatChips.innerHTML = videoFormats.map(f =>
+                    `<span class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors" style="font-size:10px;">${f}</span>`
+                ).join('');
+            } else {
+                indicator.style.left = 'calc(50%)';
+                indicator.style.transform = 'translateX(-4px)';
+                btnImage.classList.replace('text-on-surface-variant', 'text-on-primary');
+                btnVideo.classList.replace('text-on-primary', 'text-on-surface-variant');
+                dropHeadline.textContent = 'Drop your image here';
+                formatChips.innerHTML = imageFormats.map(f =>
+                    `<span class="px-2.5 py-0.5 bg-surface-container-high/70 rounded font-mono text-outline border border-outline-variant/30 group-hover:border-primary/25 transition-colors" style="font-size:10px;">${f}</span>`
+                ).join('');
+            }
+        }
+        btnVideo.addEventListener('click', () => setMode('video'));
+        btnImage.addEventListener('click', () => setMode('image'));
+
+        // Demo: simulate compress on click
+        let demoTimeout;
+        function showProgress() {
+            document.getElementById('cta-section').classList.add('hidden');
+            document.getElementById('progress-section').classList.remove('hidden');
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('error-section').classList.add('hidden');
+            let pct = 0;
+            const bar = document.getElementById('progress-bar');
+            const pctLabel = document.getElementById('pct-label');
+            const etaLabel = document.getElementById('eta-label');
+            const cpuBar = document.getElementById('cpu-bar');
+            const cpuVal = document.getElementById('cpu-val');
+            const gpuBar = document.getElementById('gpu-bar');
+            const gpuVal = document.getElementById('gpu-val');
+            const estOut = document.getElementById('est-output');
+            const queueCount = document.getElementById('queue-count');
+            queueCount.textContent = '1 Active';
+            const iv = setInterval(() => {
+                pct = Math.min(pct + Math.random() * 4, 100);
+                bar.style.width = pct + '%';
+                pctLabel.textContent = Math.round(pct) + '%';
+                const eta = Math.round((100 - pct) / 4);
+                etaLabel.textContent = eta > 0 ? eta + 's remaining' : 'Finishing…';
+                document.getElementById('fps-label').textContent = Math.round(18 + Math.random() * 10) + ' fps';
+                const cpuPct = Math.round(30 + Math.random() * 50);
+                cpuBar.style.width = cpuPct + '%'; cpuVal.textContent = cpuPct + '%';
+                const gpuPct = Math.round(20 + Math.random() * 60);
+                gpuBar.style.width = gpuPct + '%'; gpuVal.textContent = gpuPct + '%';
+                estOut.textContent = Math.round(2400 * (1 - pct * 0.006)) + ' MB';
+                if (pct >= 100) {
+                    clearInterval(iv);
+                    queueCount.textContent = '0 Active';
+                    setTimeout(showResult, 400);
+                }
+            }, 120);
+        }
+
+        function showResult() {
+            document.getElementById('progress-section').classList.add('hidden');
+            document.getElementById('result-section').classList.remove('hidden');
+            document.getElementById('est-output').textContent = '680 MB';
+        }
+
+        document.getElementById('main-compress-btn')?.addEventListener('click', () => {
+            document.getElementById('drop-idle').classList.add('hidden');
+            document.getElementById('drop-loaded').classList.remove('hidden');
+            showProgress();
+        });
+        document.getElementById('compress-btn')?.addEventListener('click', () => {
+            document.getElementById('drop-idle').classList.add('hidden');
+            document.getElementById('drop-loaded').classList.remove('hidden');
+            showProgress();
+        });
+        document.getElementById('compress-another-btn')?.addEventListener('click', () => {
+            document.getElementById('result-section').classList.add('hidden');
+            document.getElementById('cta-section').classList.remove('hidden');
+            document.getElementById('drop-loaded').classList.add('hidden');
+            document.getElementById('drop-idle').classList.remove('hidden');
+            document.getElementById('est-output').textContent = '-- MB';
+            document.getElementById('cpu-bar').style.width = '12%';
+            document.getElementById('gpu-bar').style.width = '4%';
+            document.getElementById('cpu-val').textContent = '12%';
+            document.getElementById('gpu-val').textContent = '4%';
+        });
+        document.getElementById('cancel-btn')?.addEventListener('click', () => {
+            document.getElementById('progress-section').classList.add('hidden');
+            document.getElementById('cta-section').classList.remove('hidden');
+            document.getElementById('queue-count').textContent = '0 Active';
+        });
+        document.getElementById('remove-file')?.addEventListener('click', () => {
+            document.getElementById('drop-loaded').classList.add('hidden');
+            document.getElementById('drop-idle').classList.remove('hidden');
+        });
+    </script>
+</body>
+
+</html>

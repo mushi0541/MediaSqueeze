@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
+@import '@fontsource/geist/400.css';
+@import '@fontsource/geist/500.css';
+@import '@fontsource/geist/600.css';
+@import '@fontsource/geist/700.css';
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  overflow: hidden;
+  overscroll-behavior: none;
+  user-select: none;
+  font-family: "Geist", system-ui, sans-serif;
+}
+
+/* ── Animated mesh background ── */
+.animated-bg {
+  background: linear-gradient(-45deg, #09100c, #0e1511, #0a1a12, #002e20, #001f16, #0e1511);
+  background-size: 600% 600%;
+  animation: bg-shift 18s ease infinite;
+}
+
+/* ── Terminal grid overlay ── */
+.terminal-grid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    linear-gradient(rgba(78, 222, 163, 0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(78, 222, 163, 0.025) 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Film grain ── */
+.film-grain::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ── Glass surface ── */
+.glass {
+  background: rgba(22, 29, 25, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(60, 74, 66, 0.45);
+}
+
+/* ── Drop zone ── */
+.drop-zone {
+  border: 2px dashed #3c4a42;
+  border-radius: 24px;
+  transition: border-color 0.3s, background 0.3s;
+}
+.drop-zone:hover {
+  border-color: #4edea3;
+  background: rgba(78, 222, 163, 0.04);
+}
+.drop-zone.active-border {
+  animation: pulse-border 3s ease infinite;
+}
+
+/* ── Progress bar shimmer ── */
+.progress-fill {
+  background: linear-gradient(90deg, #2db882 0%, #4edea3 40%, #71f8e4 60%, #4edea3 80%, #2db882 100%);
+  background-size: 200% 100%;
+  animation: shimmer 2s linear infinite;
+  border-radius: 9999px;
+  height: 100%;
+  transition: width 0.4s ease;
+}
+
+/* ── Waveform bars ── */
+.wave-bar {
+  width: 2.5px;
+  background: #4edea3;
+  border-radius: 2px;
+  display: inline-block;
+  margin: 0 1px;
+  animation: waveform 1.2s ease-in-out infinite alternate;
+  min-height: 4px;
+}
+.wave-bar:nth-child(2n)  { animation-delay: 0.15s; }
+.wave-bar:nth-child(3n)  { animation-delay: 0.3s;  }
+.wave-bar:nth-child(4n)  { animation-delay: 0.08s; }
+.wave-bar:nth-child(5n)  { animation-delay: 0.45s; }
+.wave-bar:nth-child(7n)  { animation-delay: 0.22s; }
+.wave-bar:nth-child(11n) { animation-delay: 0.55s; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar       { width: 5px; height: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: #2f3632; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #4edea3; }
+
+/* ── Sidebar nav active ── */
+.nav-active {
+  background: rgba(78, 222, 163, 0.12);
+  color: #4edea3;
+  border-left: 2px solid #4edea3;
+}
+
+/* ── Metric bar ── */
+.metric-bar-fill {
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.6s ease;
+}
+
+/* ── Glow button ── */
+.btn-glow {
+  box-shadow: 0 0 20px rgba(78, 222, 163, 0.3);
+  transition: box-shadow 0.3s, transform 0.15s;
+}
+.btn-glow:hover {
+  box-shadow: 0 0 36px rgba(78, 222, 163, 0.55);
+  transform: translateY(-1px);
+}
+.btn-glow:active {
+  transform: scale(0.97);
+}
+
+/* ── Preset card glow ── */
+.preset-active {
+  border-color: #4edea3 !important;
+  background: rgba(78, 222, 163, 0.08);
+  box-shadow: 0 0 18px rgba(78, 222, 163, 0.18), inset 0 0 0 1px rgba(78, 222, 163, 0.15);
+}
+
+/* ── Type pill toggle ── */
+.type-pill-bg {
+  background: rgba(36, 44, 39, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(60, 74, 66, 0.4);
+}
+
+/* ── History entry ── */
+.history-entry {
+  animation: slide-up 0.35s ease forwards;
+}
+
+/* ── Result panel ── */
+.result-panel {
+  animation: fade-in 0.5s ease forwards;
+}
+
+/* ── Confetti dot ── */
+@keyframes confetti-fall {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(60px) rotate(360deg); opacity: 0; }
+}
+.confetti-dot {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 2px;
+  animation: confetti-fall 0.8s ease forwards;
+}

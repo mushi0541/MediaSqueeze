@@ -1,0 +1,53 @@
+{
+  "$schema":     "https://schema.tauri.app/config/2",
+  "productName": "MediaSqueeze",
+  "version":     "1.0.0",
+  "identifier":  "com.mediasqueeze.dev",
+  "build": {
+    "beforeDevCommand":   "npm run dev",
+    "beforeBuildCommand": "npm run build",
+    "devUrl":             "http://localhost:1420",
+    "frontendDist":       "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title":           "MediaSqueeze",
+        "width":           1280,
+        "height":          780,
+        "minWidth":        1100,
+        "minHeight":       680,
+        "resizable":       true,
+        "fullscreen":      false,
+        "center":          true,
+        "decorations":     false,
+        "transparent":     false,
+        "dragDropEnabled": true
+      }
+    ],
+    "security": { "csp": null }
+  },
+  "bundle": {
+    "active":      true,
+    "targets":     "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "externalBin": ["binaries/ffmpeg", "binaries/ffprobe"],
+    "license": "../LICENSE",
+    "resources": ["../Readme.txt", "../INSTALL_INSTRUCTIONS.txt"],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico",
+        "headerImage": "icons/nsis-header.bmp",
+        "sidebarImage": "icons/nsis-sidebar.bmp",
+        "displayLanguageSelector": false
+      }
+    }
+  }
+}
