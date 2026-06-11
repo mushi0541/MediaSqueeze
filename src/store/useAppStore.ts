@@ -2,7 +2,8 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type {
   MediaType, Preset, Resolution, OutputFormat, ImageFormat, HwAccel,
-  AppStatus, QueuedFile, ProgressPayload, CompressionResult, HistoryEntry
+  AppStatus, QueuedFile, ProgressPayload, CompressionResult, HistoryEntry,
+  FpsOverride, AspectRatio
 } from '@/types'
 
 interface AppState {
@@ -21,6 +22,13 @@ interface AppState {
   audioBitrate:  number
   twoPass:       boolean
   videoCodec:    string
+  customResolutionWidth: string
+  customResolutionHeight: string
+  fpsOverride:   FpsOverride
+  customFps:     string
+  aspectRatio:   AspectRatio
+  speed:         number
+  isProMode:     boolean
   // Image settings
   imageQuality:  number
   imageFormat:   ImageFormat
@@ -57,6 +65,13 @@ interface AppState {
   setAudioBitrate:  (b: number) => void
   setTwoPass:       (v: boolean) => void
   setVideoCodec:    (c: string) => void
+  setCustomResolutionWidth: (w: string) => void
+  setCustomResolutionHeight: (h: string) => void
+  setFpsOverride:   (f: FpsOverride) => void
+  setCustomFps:     (fps: string) => void
+  setAspectRatio:   (r: AspectRatio) => void
+  setSpeed:         (s: number) => void
+  setIsProMode:     (v: boolean) => void
   setImageQuality:  (q: number) => void
   setImageFormat:   (f: ImageFormat) => void
   setImageWidth:    (w: number | null) => void
@@ -87,10 +102,17 @@ export const useAppStore = create<AppState>()(
   resolution:    'original',
   format:        'mp4',
   removeAudio:   false,
-  audioCodec:    'AAC',
+  audioCodec:    'aac',
   audioBitrate:  192,
   twoPass:       true,
-  videoCodec:    'H.265 (HEVC)',
+  videoCodec:    'hevc',
+  customResolutionWidth: '1920',
+  customResolutionHeight: '1080',
+  fpsOverride:   'original',
+  customFps:     '60',
+  aspectRatio:   'original',
+  speed:         1.0,
+  isProMode:     false,
   imageQuality:  75,
   imageFormat:   'jpg',
   imageWidth:    null,
@@ -125,6 +147,13 @@ export const useAppStore = create<AppState>()(
   setAudioBitrate:  (b) => set({ audioBitrate: b }),
   setTwoPass:       (v) => set({ twoPass: v }),
   setVideoCodec:    (c) => set({ videoCodec: c }),
+  setCustomResolutionWidth: (w) => set({ customResolutionWidth: w }),
+  setCustomResolutionHeight: (h) => set({ customResolutionHeight: h }),
+  setFpsOverride:   (f) => set({ fpsOverride: f }),
+  setCustomFps:     (fps) => set({ customFps: fps }),
+  setAspectRatio:   (r) => set({ aspectRatio: r }),
+  setSpeed:         (s) => set({ speed: s }),
+  setIsProMode:     (v) => set({ isProMode: v }),
   setImageQuality:  (q) => set({ imageQuality: q }),
   setImageFormat:   (f) => set({ imageFormat: f }),
   setImageWidth:    (w) => set({ imageWidth: w }),
@@ -150,6 +179,13 @@ export const useAppStore = create<AppState>()(
         preset: state.preset,
         crf: state.crf,
         resolution: state.resolution,
+        customResolutionWidth: state.customResolutionWidth,
+        customResolutionHeight: state.customResolutionHeight,
+        fpsOverride: state.fpsOverride,
+        customFps: state.customFps,
+        aspectRatio: state.aspectRatio,
+        speed: state.speed,
+        isProMode: state.isProMode,
         format: state.format,
         audioBitrate: state.audioBitrate,
         removeAudio: state.removeAudio,

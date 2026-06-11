@@ -119,7 +119,10 @@ export function useCompression() {
   const startCompression = useCallback(async () => {
     const state = useAppStore.getState()
     const { queue, preset, crf, resolution, format, removeAudio, hwAccel,
-            mediaType, imageQuality, imageFormat, stripMetadata, outputFolder } = state
+            mediaType, imageQuality, imageFormat, stripMetadata, outputFolder,
+            videoCodec, audioCodec, audioBitrate,
+            fpsOverride, aspectRatio, speed,
+            customResolutionWidth, customResolutionHeight, customFps } = state
     if (queue.length === 0) return
 
     useAppStore.getState().setStatus('compressing')
@@ -140,15 +143,24 @@ export function useCompression() {
           const outName = `${baseName}_${preset}.${format}`
           const outputPath = `${outDir}\\${outName}`
 
+          const actualResolution = resolution === 'custom' ? `${customResolutionWidth}x${customResolutionHeight}` : resolution
+          const actualFps = fpsOverride === 'custom' ? customFps : fpsOverride
+
           const result = await invoke<{ output_path: string; output_size: number }>('compress_video', {
             inputPath: file.path,
             outputPath,
             crf,
             preset,
-            resolution,
+            resolution: actualResolution,
             format,
             removeAudio,
             hwAccel,
+            videoCodec,
+            audioCodec,
+            audioBitrate,
+            fpsOverride: actualFps,
+            aspectRatio,
+            speed,
           })
 
           const inputSizeBytes = file.sizeBytes

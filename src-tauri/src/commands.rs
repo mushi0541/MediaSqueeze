@@ -107,14 +107,20 @@ fn auto_rename(output_path: &str) -> String {
 }
 
 fn build_ffmpeg_args(
-    input_path:   &str,
-    output_path:  &str,
-    crf:          u8,
-    preset_name:  &str,
-    resolution:   &str,
-    format:       &str,
-    remove_audio: bool,
-    hw_accel:     &str,
+    input_path:    &str,
+    output_path:   &str,
+    crf:           u8,
+    preset_name:   &str,
+    resolution:    &str,
+    format:        &str,
+    remove_audio:  bool,
+    hw_accel:      &str,
+    video_codec:   &str,
+    audio_codec:   &str,
+    audio_bitrate: u32,
+    fps_override:  &str,
+    aspect_ratio:  &str,
+    speed:         f64,
 ) -> Vec<String> {
     let mut args = vec![
         "-y".into(),
@@ -123,42 +129,113 @@ fn build_ffmpeg_args(
 
     match hw_accel {
         "nvenc" => {
-            args.extend(["-vcodec".into(), "h264_nvenc".into()]);
+            if video_codec == "hevc" {
+                args.extend(["-c:v".into(), "hevc_nvenc".into()]);
+            } else {
+                args.extend(["-c:v".into(), "h264_nvenc".into()]);
+            }
             args.extend(["-cq".into(), crf.to_string()]); // NVENC uses -cq instead of -crf
             args.extend(["-preset".into(), preset_name.to_string()]);
         }
-        "amf" => {
-            args.extend(["-vcodec".into(), "h264_amf".into()]);
-            args.extend(["-rc".into(), "cqp".into()]);
-            args.extend(["-qp_i".into(), crf.to_string()]);
-            args.extend(["-qp_p".into(), crf.to_string()]);
-            // AMF presets are different, fallback to safe defaults or skip
-        }
         "qsv" => {
-            args.extend(["-vcodec".into(), "h264_qsv".into()]);
-            args.extend(["-q".into(), crf.to_string()]);
+            if video_codec == "hevc" {
+                args.extend(["-c:v".into(), "hevc_qsv".into()]);
+            } else {
+                args.extend(["-c:v".into(), "h264_qsv".into()]);
+            }
+            args.extend(["-global_quality".into(), crf.to_string()]);
             args.extend(["-preset".into(), preset_name.to_string()]);
         }
-        _ => { // "cpu"
-            args.extend(["-vcodec".into(), "libx264".into()]);
+        "videotoolbox" => {
+            if video_codec == "hevc" {
+                args.extend(["-c:v".into(), "hevc_videotoolbox".into()]);
+            } else {
+                args.extend(["-c:v".into(), "h264_videotoolbox".into()]);
+            }
+            args.extend(["-q:v".into(), crf.to_string()]);
+        }
+        _ => {
+            if video_codec == "hevc" {
+                args.extend(["-c:v".into(), "libx265".into()]);
+            } else if video_codec == "vp9" {
+                args.extend(["-c:v".into(), "libvpx-vp9".into()]);
+            } else if video_codec == "av1" {
+                args.extend(["-c:v".into(), "libaom-av1".into()]);
+            } else {
+                args.extend(["-c:v".into(), "libx264".into()]);
+            }
             args.extend(["-crf".into(), crf.to_string()]);
             args.extend(["-preset".into(), preset_name.to_string()]);
         }
     }
 
-    match resolution {
-        "4k"    => { args.push("-vf".into()); args.push("scale=-2:2160".into()); }
-        "1080p" => { args.push("-vf".into()); args.push("scale=-2:1080".into()); }
-        "720p"  => { args.push("-vf".into()); args.push("scale=-2:720".into());  }
-        "480p"  => { args.push("-vf".into()); args.push("scale=-2:480".into());  }
-        _       => {}
+    if fps_override != "original" {
+        args.extend(["-r".into(), fps_override.to_string()]);
+    }
+
+    if aspect_ratio != "original" {
+        args.extend(["-aspect".into(), aspect_ratio.to_string()]);
+    }
+
+    let mut vf_parts = Vec::new();
+    let mut af_parts = Vec::new();
+
+    if resolution != "original" {
+        match resolution {
+            "4k"    => vf_parts.push("scale=-2:2160".into()),
+            "1080p" => vf_parts.push("scale=-2:1080".into()),
+            "720p"  => vf_parts.push("scale=-2:720".into()),
+            "480p"  => vf_parts.push("scale=-2:480".into()),
+            custom  => {
+                if custom.contains('x') {
+                    let parts: Vec<&str> = custom.split('x').collect();
+                    if parts.len() == 2 {
+                        let w = parts[0];
+                        let h = parts[1];
+                        vf_parts.push(format!("scale={}:{}", w, h));
+                    }
+                }
+            }
+        }
+    }
+
+    if (speed - 1.0).abs() > 0.01 {
+        let pts_factor = 1.0 / speed;
+        vf_parts.push(format!("setpts={}*PTS", pts_factor));
+
+        if !remove_audio {
+            if speed > 2.0 {
+                let mut current_speed = speed;
+                while current_speed > 2.0 {
+                    af_parts.push("atempo=2.0".to_string());
+                    current_speed /= 2.0;
+                }
+                af_parts.push(format!("atempo={}", current_speed));
+            } else if speed < 0.5 {
+                let mut current_speed = speed;
+                while current_speed < 0.5 {
+                    af_parts.push("atempo=0.5".to_string());
+                    current_speed /= 0.5;
+                }
+                af_parts.push(format!("atempo={}", current_speed));
+            } else {
+                af_parts.push(format!("atempo={}", speed));
+            }
+        }
+    }
+
+    if !vf_parts.is_empty() {
+        args.extend(["-vf".into(), vf_parts.join(",")]);
     }
 
     if remove_audio {
         args.push("-an".into());
     } else {
-        let ab = if crf <= 20 { "192k" } else if crf <= 28 { "128k" } else { "96k" };
-        args.extend(["-acodec".into(), "aac".into(), "-b:a".into(), ab.into()]);
+        args.extend(["-c:a".into(), audio_codec.to_string()]);
+        args.extend(["-b:a".into(), format!("{}k", audio_bitrate)]);
+        if !af_parts.is_empty() {
+            args.extend(["-af".into(), af_parts.join(",")]);
+        }
     }
 
     if format == "mp4" {
@@ -290,6 +367,12 @@ pub async fn compress_video(
     format:       String,
     remove_audio: bool,
     hw_accel:     String,
+    video_codec:  String,
+    audio_codec:  String,
+    audio_bitrate: u32,
+    fps_override: String,
+    aspect_ratio: String,
+    speed:        f64,
 ) -> Result<CompressResult, String> {
     let final_output = auto_rename(&output_path);
 
@@ -302,6 +385,12 @@ pub async fn compress_video(
         &format,
         remove_audio,
         &hw_accel,
+        &video_codec,
+        &audio_codec,
+        audio_bitrate,
+        &fps_override,
+        &aspect_ratio,
+        speed,
     );
 
     let (mut rx, child) = app

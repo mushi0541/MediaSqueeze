@@ -1,10 +1,18 @@
-export type MediaType  = 'video' | 'image'
-export type Preset     = 'low' | 'medium' | 'high'
-export type AppStatus  = 'idle' | 'compressing' | 'done' | 'error'
-export type Resolution = 'original' | '4k' | '1080p' | '720p' | '480p'
-export type OutputFormat = 'mp4' | 'mkv' | 'webm'
+export type MediaType    = 'video' | 'image'
+export type Preset       = 'low' | 'medium' | 'high'
+export type AppStatus    = 'idle' | 'compressing' | 'done' | 'error'
+export type Resolution   = 'original' | '4k' | '1080p' | '720p' | '480p' | 'custom'
+export type OutputFormat = 'mp4' | 'mkv' | 'webm' | 'mov' | 'avi' | 'gif'
 export type ImageFormat  = 'jpg' | 'png' | 'webp'
 export type HwAccel      = 'cpu' | 'nvenc' | 'amf' | 'qsv'
+export type AspectRatio  = 'original' | '16:9' | '9:16' | '4:3' | '1:1'
+export type FpsOverride  = 'original' | '60' | '30' | '24' | '15' | 'custom'
+
+export interface TrimSegment {
+  id: string
+  start: number
+  end: number
+}
 
 export interface QueuedFile {
   id: string

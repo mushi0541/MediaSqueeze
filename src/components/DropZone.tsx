@@ -7,7 +7,6 @@ import { useCompression } from '@/hooks/useCompression'
 const VIDEO_FORMATS = ['MP4', 'AVI', 'MOV', 'MKV', 'WEBM', 'FLV', 'M4V']
 const IMAGE_FORMATS = ['JPG', 'PNG', 'WEBP', 'AVIF', 'TIFF', 'BMP', 'GIF']
 
-
 export function DropZone() {
   const store = useAppStore()
   const { pickFile } = useCompression()
